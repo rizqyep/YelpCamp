@@ -1,9 +1,11 @@
 const express = require("express"),
-  app = express(),
-  mongoose = require('mongoose'),
-  bodyParser = require("body-parser");
+  app         = express(),
+  mongoose    = require('mongoose'),
+  bodyParser  = require("body-parser"),
+  Campground  = require("./models/campground"),
+  seedDB      = require("./seeds");
 
-mongoose.connect("mongodb://localhost/yelp_camp", {
+mongoose.connect("mongodb://localhost/yelp_camp_v3", {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
@@ -12,20 +14,8 @@ app.use(bodyParser.urlencoded({
 }));
 app.set("view engine", "ejs");
 
-//Schema Setup 
-const campgroundSchema = new mongoose.Schema({
-  name: String,
-  image: String,
-  description: String
-});
 
-const Campground = mongoose.model("Campground", campgroundSchema);
-
-// Campground.create({
-//   name: "Lhok Keutapang",
-//   image: "https://4.bp.blogspot.com/-tA5I_ZadriE/U_OYF0BYLvI/AAAAAAAABm0/MFCAXEWKuiU/s1600/keutapang6.jpg",
-//   description: "Hidden pretty beach located somewhre"
-// });
+seedDB();
 
 
 app.get("/", (req, res) => {
@@ -69,16 +59,16 @@ app.get("/campgrounds/new", (req, res) => {
 app.get("/campgrounds/:id", (req, res) => {
   //find campground id 
   const id = req.params.id;
-  Campground.findById(id).then(
-    (foundCampground) => {
-      res.render("show", {
-        campground: foundCampground
-      });
-    }
-  ).catch((err) => {
-    console.log(err);
-  })
-
+  Campground.findById(id).populate("comments").exec(
+    (err, foundCampground) => {
+		if(err){
+			console.log(err);
+		}
+		else{
+		  console.log(foundCampground);
+		  res.render("show", {campground: foundCampground });		
+		}
+    });
 })
 
 app.listen(3000, "0.0.0.0", () => {
