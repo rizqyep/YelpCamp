@@ -1,9 +1,10 @@
 const express = require("express"),
-  app         = express(),
-  mongoose    = require('mongoose'),
-  bodyParser  = require("body-parser"),
-  Campground  = require("./models/campground"),
-  seedDB      = require("./seeds");
+  app = express(),
+  mongoose = require('mongoose'),
+  bodyParser = require("body-parser"),
+  Campground = require("./models/campground"),
+  Comment = require("./models/comment");
+seedDB = require("./seeds");
 
 mongoose.connect("mongodb://localhost/yelp_camp_v3", {
   useNewUrlParser: true,
@@ -25,7 +26,7 @@ app.get("/", (req, res) => {
 app.get("/campgrounds", (req, res) => {
   //get Campgrounds from db
   Campground.find({}).then((campgrounds) => {
-    res.render("index", {
+    res.render("campgrounds/index", {
       campgrounds: campgrounds
     })
   }).catch((err) => {
@@ -53,7 +54,7 @@ app.post("/campgrounds", (req, res) => {
 });
 
 app.get("/campgrounds/new", (req, res) => {
-  res.render("new");
+  res.render("campgrounds/new");
 });
 
 app.get("/campgrounds/:id", (req, res) => {
@@ -61,15 +62,43 @@ app.get("/campgrounds/:id", (req, res) => {
   const id = req.params.id;
   Campground.findById(id).populate("comments").exec(
     (err, foundCampground) => {
-		if(err){
-			console.log(err);
-		}
-		else{
-		  console.log(foundCampground);
-		  res.render("show", {campground: foundCampground });		
-		}
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(foundCampground);
+        res.render("campgrounds/show", {
+          campground: foundCampground
+        });
+      }
     });
 })
+
+app.get("/campgrounds/:id/comments/new", (req, res) => {
+  Campground.findById(req.params.id).then((campground) => {
+    res.render("comments/new", {
+      campground: campground
+    });
+  }).catch((err) => {
+    console.log(err);
+  })
+
+});
+
+app.post("/campgrounds/:id/comments", (req, res) => {
+  //look for campgrounds in database 
+  Campground.findById(req.params.id).then((campground) => {
+    Comment.create(req.body.comment).then((comment) => {
+      campground.comments.push(comment);
+      campground.save();
+      res.redirect("/campgrounds/" + campground._id);
+    }).catch((err) => console.log(err));
+  }).catch((err) => {
+    console.log(err);
+  })
+})
+
+
+
 
 app.listen(3000, "0.0.0.0", () => {
   console.log("YelpCamp Server started at port 3000");
