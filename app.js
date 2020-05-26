@@ -2,11 +2,27 @@ const express = require("express"),
   app = express(),
   mongoose = require('mongoose'),
   bodyParser = require("body-parser"),
+  passport = require("passport"),
+  localStrategy = require("passport-local"),
+  User = require("./models/user"),
   Campground = require("./models/campground"),
   Comment = require("./models/comment");
 seedDB = require("./seeds");
 
-mongoose.connect("mongodb://localhost/yelp_camp_v3", {
+//PASSPORT CONFIG
+app.use(require("express-session")({
+  secret: "Rep will rule the it world",
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+mongoose.connect("mongodb://localhost/yelp_camp_v6", {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
@@ -14,10 +30,23 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(express.static(__dirname + "/public"));
+app.use((req, res, next) => {
+  res.locals.currentUser = req.user;
+  next();
+})
 app.set("view engine", "ejs");
 
 
 seedDB();
+
+
+const isLoggedIn = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/login");
+
+}
 
 
 app.get("/", (req, res) => {
@@ -26,6 +55,7 @@ app.get("/", (req, res) => {
 
 app.get("/campgrounds", (req, res) => {
   //get Campgrounds from db
+
   Campground.find({}).then((campgrounds) => {
     res.render("campgrounds/index", {
       campgrounds: campgrounds
@@ -38,6 +68,7 @@ app.get("/campgrounds", (req, res) => {
 
 app.post("/campgrounds", (req, res) => {
   //get data from form
+
   let name = req.body.name;
   let image = req.body.imageurl;
   let desc = req.body.description;
@@ -74,7 +105,9 @@ app.get("/campgrounds/:id", (req, res) => {
     });
 })
 
-app.get("/campgrounds/:id/comments/new", (req, res) => {
+
+//COMMENTS ROUTES
+app.get("/campgrounds/:id/comments/new", isLoggedIn, (req, res) => {
   Campground.findById(req.params.id).then((campground) => {
     res.render("comments/new", {
       campground: campground
@@ -85,7 +118,7 @@ app.get("/campgrounds/:id/comments/new", (req, res) => {
 
 });
 
-app.post("/campgrounds/:id/comments", (req, res) => {
+app.post("/campgrounds/:id/comments", isLoggedIn, (req, res) => {
   //look for campgrounds in database 
   Campground.findById(req.params.id).then((campground) => {
     Comment.create(req.body.comment).then((comment) => {
@@ -98,6 +131,45 @@ app.post("/campgrounds/:id/comments", (req, res) => {
   })
 })
 
+
+//AUTH ROUTES
+
+//REGISTER ROUTES
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+app.post("/register", (req, res) => {
+  let newUser = new User({
+    username: req.body.username
+  });
+  User.register(newUser, req.body.password, (err, user) => {
+    if (err) {
+      console.log(err);
+      return res.render("register");
+    }
+    passport.authenticate("local")(req, res, () => {
+      res.redirect("/campgrounds");
+    });
+  })
+});
+
+//LOGIN ROUTES
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.post("/login", passport.authenticate("local", {
+  successRedirect: "/campgrounds",
+  failureRedirect: "/login"
+}), (req, res) => {
+
+});
+
+//LOGOUT
+app.get("/logout", (req, res) => {
+  req.logout();
+  res.redirect("/campgrounds");
+})
 
 
 
