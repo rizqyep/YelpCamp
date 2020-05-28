@@ -4,15 +4,9 @@ const router = express.Router({
 });
 const Campground = require("../models/campground");
 const Comment = require("../models/comment");
-const isLoggedIn = (req, res, next) => {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect("/login");
-
-}
+const middleware = require("../middleware");
 //COMMENTS ROUTES
-router.get("/new", isLoggedIn, (req, res) => {
+router.get("/new", middleware.isLoggedIn, (req, res) => {
     Campground.findById(req.params.id).then((campground) => {
         res.render("comments/new", {
             campground: campground
@@ -23,7 +17,7 @@ router.get("/new", isLoggedIn, (req, res) => {
 
 });
 
-router.post("/", isLoggedIn, (req, res) => {
+router.post("/", middleware.isLoggedIn, (req, res) => {
     //look for campgrounds in database 
     Campground.findById(req.params.id).then((campground) => {
         Comment.create(req.body.comment).then((comment) => {
@@ -37,6 +31,39 @@ router.post("/", isLoggedIn, (req, res) => {
         }).catch((err) => console.log(err));
     }).catch((err) => {
         console.log(err);
+    })
+});
+
+//EDIT ROUTES
+router.get("/:comment_id/edit", (req, res) => {
+
+    Comment.findById(req.params.comment_id).then((foundComment) => {
+        res.render("comments/edit", {
+            comment: foundComment,
+            campground_id: req.params.id
+        })
+    }).catch((err) => {
+        res.redirect("back");
+    })
+});
+
+//UPDATE ROUTES
+router.put("/:comment_id", middleware.checkCommentOwnership, (req, res) => {
+    Comment.findByIdAndUpdate(req.params.comment_id, req.body.comment).then((updatedComment) => {
+        console.log(updatedComment);
+        res.redirect("/campgrounds/" + req.params.id);
+    }).catch((err) => {
+        res.redirect("back");
+    })
+})
+
+//COMMENTS DESTROY 
+
+router.delete("/:comment_id", middleware.checkCommentOwnership, (req, res) => {
+    Comment.findByIdAndRemove(req.params.comment_id).then(() => {
+        res.redirect("/campgrounds/" + req.params.id);
+    }).catch((err) => {
+        res.redirect("back");
     })
 })
 
