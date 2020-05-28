@@ -3,14 +3,6 @@ const router = express.Router();
 const passport = require("passport");
 const User = require("../models/user");
 
-const isLoggedIn = (req, res, next) => {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect("/login");
-
-}
-
 router.get("/", (req, res) => {
     res.render("landing");
 });
@@ -35,7 +27,9 @@ router.post("/register", (req, res) => {
 
 //LOGIN ROUTES
 router.get("/login", (req, res) => {
-    res.render("login");
+    res.render("login", {
+        message: "You messed up"
+    });
 });
 
 router.post("/login", passport.authenticate("local", {
