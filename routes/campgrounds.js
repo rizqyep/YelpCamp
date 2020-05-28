@@ -76,4 +76,15 @@ router.get("/:id", (req, res) => {
             }
         });
 });
+
+router.get("/:id/edit", (req, res) => {
+    Campground.findById(req.params.id).then((foundCampground) => {
+        res.render("campgrounds/edit", {
+            campground: foundCampground
+        });
+    }).catch((err) => {
+        console.log(err);
+        res.redirect("/campgprounds");
+    })
+})
 module.exports = router;
