@@ -21,6 +21,9 @@
 						</a>
 					</h4>
 					<p><%=campground.description%></p>
+					<p>
+						<em>Submitted by : <%=campground.author.username%></em>
+					</p>
 				</div>
 			</div>
 			<div class="well">
@@ -31,7 +34,7 @@
 				<% campground.comments.forEach((comment)=>{%>
 				<div class="row">
 					<div class="col-md-10">
-						<strong><%= comment.author%></strong>
+						<strong><%= comment.author.username%></strong>
 						<p><%= comment.text%></p>
 
 					</div>

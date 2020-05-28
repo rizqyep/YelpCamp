@@ -25,7 +25,7 @@ const seedDB = () => {
 	//Remove all Campground
 	Campground.remove({}).then(() => {
 		console.log("Removed Campgrounds!")
-		//add few CGs
+		// add few CGs
 		data.forEach((seed) => {
 			Campground.create(seed).then((campground) => {
 				console.log("Added a campground!");

@@ -40,7 +40,8 @@ app.use((req, res, next) => {
 })
 app.set("view engine", "ejs");
 
-seedDB();
+
+// seedDB(); //seed db
 
 
 app.use(indexRoutes);
