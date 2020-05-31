@@ -21,16 +21,16 @@ app.use(require("express-session")({
   resave: false,
   saveUninitialized: false
 }));
-
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride("_method"));
-app.use(flash());
+
 passport.use(new localStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-mongoose.connect("mongodb://localhost/yelp_camp_v6", {
+mongoose.connect("mongodb://localhost/yelp_camp_v10", {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
@@ -40,6 +40,8 @@ app.use(bodyParser.urlencoded({
 app.use(express.static(__dirname + "/public"));
 app.use((req, res, next) => {
   res.locals.currentUser = req.user;
+  res.locals.error = req.flash("error");
+  res.locals.success = req.flash("success");
   next();
 })
 app.set("view engine", "ejs");

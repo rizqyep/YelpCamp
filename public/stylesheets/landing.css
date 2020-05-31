@@ -1,0 +1,91 @@
+body {
+    background-color: #000;
+}
+
+#landing-header {
+    z-index: 1;
+    position: relative;
+    text-align: center;
+    padding-top: 40vh;
+}
+
+#landing-header h1 {
+    color: #fff;
+    font-size: 40px;
+    margin-bottom: 5vh;
+}
+
+.slideshow {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.slideshow li {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    opacity: 0;
+    z-index: 0;
+    animation: imageAnimation 50s linear infinite;
+}
+
+.slideshow li:nth-child(1) {
+    background-image: url("https://i.pinimg.com/originals/d6/7b/de/d67bdebcc060c1f86cce16b76541307d.jpg")
+}
+
+.slideshow li:nth-child(2) {
+    background-image: url("https://img4.goodfon.com/wallpaper/nbig/b/76/putishestvie-palatka-noch-svet-gory-kanada.jpg");
+    animation-delay: 10s;
+}
+
+.slideshow li:nth-child(3) {
+    background-image: url("https://www.mountainphotography.com/images/xl/20140226-Bridge-of-Heaven-Night.jpg");
+    animation-delay: 20s;
+}
+
+.slideshow li:nth-child(4) {
+    background-image: url("https://www.10wallpaper.com/wallpaper/1366x768/1205/iceland_national_park-scenery_wallpaper_1366x768.jpg");
+    animation-delay: 30s;
+}
+
+.slideshow li:nth-child(5) {
+    background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTmhANGl1AgetilDCfuLqGGwxVdk2QPE-x6N8JVG3jfupACHdPr&usqp=CAU");
+    animation-delay: 40s;
+}
+
+@keyframes imageAnimation {
+    0% {
+        opacity: 0;
+        animation-timing-function: ease-in;
+    }
+
+    10% {
+        opacity: 1;
+        animation-timing-function: ease-out;
+    }
+
+    20% {
+        opacity: 1
+    }
+
+    30% {
+        opacity: 0
+    }
+}
+
+/* Older browser support - .no-cssanimations class added by modernizr */
+.no-cssanimations .slideshow li {
+    opacity: 1;
+}
